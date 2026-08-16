@@ -52,12 +52,10 @@ export class Reel {
   }
 
   private createRandomSymbol(): PIXI.Sprite {
-    // TODO:Get a random symbol texture
     const randomSymbol = AssetLoader.getTexture(
       SYMBOL_TEXTURES[Math.floor(Math.random() * SYMBOL_TEXTURES.length)],
     );
 
-    // TODO:Create a sprite with the texture
     const sprite = new PIXI.Sprite(randomSymbol);
 
     sprite.width = 140;
@@ -69,8 +67,6 @@ export class Reel {
 
   public update(delta: number): void {
     if (!this.isSpinning && this.speed === 0) return;
-
-    // TODO:Move symbols horizontally
 
     const visibleWidth = this.symbolCount * this.symbolSize; // 900
     const trackWidth = (this.symbolCount + 1) * this.symbolSize; // 1050
@@ -116,5 +112,9 @@ export class Reel {
   public stopSpin(): void {
     this.isSpinning = false;
     // The reel will gradually slow down in the update method
+  }
+
+  public get hasFullyStopped(): boolean {
+    return !this.isSpinning && this.speed === 0;
   }
 }
