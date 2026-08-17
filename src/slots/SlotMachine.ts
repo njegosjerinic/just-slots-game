@@ -4,6 +4,7 @@ import { Reel } from "./Reel";
 import { sound } from "../utils/sound";
 import { AssetLoader } from "../utils/AssetLoader";
 import { Spine } from "pixi-spine";
+import { RGS } from "../rgs";
 
 const REEL_COUNT = 4;
 const SYMBOLS_PER_REEL = 6;
@@ -20,11 +21,13 @@ export class SlotMachine {
   private frameSpine: Spine | null = null;
   private winAnimation: Spine | null = null;
   private waitingForLastReel = false;
+  private rgs: RGS;
 
   constructor(app: PIXI.Application) {
     this.app = app;
     this.container = new PIXI.Container();
     this.reels = [];
+    this.rgs = new RGS();
 
     // Center the slot machine
     this.container.x =
@@ -58,9 +61,16 @@ export class SlotMachine {
   }
 
   private createReels(): void {
+    const initialState = this.rgs.init();
+
     // Create each reel
     for (let i = 0; i < REEL_COUNT; i++) {
-      const reel = new Reel(SYMBOLS_PER_REEL, SYMBOL_SIZE);
+      const reel = new Reel(
+        SYMBOLS_PER_REEL,
+        SYMBOL_SIZE,
+        initialState.reels[i],
+        initialState.stopPositions[i],
+      );
       reel.container.y = i * (REEL_HEIGHT + REEL_SPACING);
       this.container.addChild(reel.container);
       this.reels.push(reel);
@@ -94,6 +104,8 @@ export class SlotMachine {
   public spin(): void {
     if (this.isSpinning) return;
 
+    const spinResult = this.rgs.spin();
+
     this.isSpinning = true;
 
     // Play spin sound
@@ -116,16 +128,16 @@ export class SlotMachine {
     // Stop all reels after a delay
     setTimeout(
       () => {
-        this.stopSpin();
+        this.stopSpin(spinResult.reels, spinResult.stopPositions);
       },
       500 + (this.reels.length - 1) * 200,
     );
   }
 
-  private stopSpin(): void {
+  private stopSpin(reelStrips: string[][], stopPositions: number[]): void {
     for (let i = 0; i < this.reels.length; i++) {
       setTimeout(() => {
-        this.reels[i].stopSpin();
+        this.reels[i].stopSpin(reelStrips[i], stopPositions[i]);
 
         // If this is the last reel, check for wins and enable spin button
         if (i === this.reels.length - 1) {
@@ -137,9 +149,24 @@ export class SlotMachine {
 
   private checkWin(): void {
     // Simple win check - just for demonstration
-    const randomWin = Math.random() < 0.3; // 30% chance of winning
+    const visibleSymbols = this.reels.map((reel) => reel.getVisibleSymbols());
 
-    if (randomWin) {
+    let hasWon = false;
+
+    for (let column = 0; column < SYMBOLS_PER_REEL; column++) {
+      const firstSymbol = visibleSymbols[0][column];
+
+      const allSymbolsMatch = visibleSymbols.every(
+        (reel) => reel[column] === firstSymbol,
+      );
+
+      if (allSymbolsMatch) {
+        hasWon = true;
+        break;
+      }
+    }
+
+    if (hasWon) {
       sound.play("win");
       console.log("Winner!");
 

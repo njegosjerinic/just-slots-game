@@ -25,7 +25,7 @@ export class UI {
 
       this.spinButton.anchor.set(0.5);
       this.spinButton.x = this.app.screen.width / 2;
-      this.spinButton.y = this.app.screen.height;
+      this.spinButton.y = this.app.screen.height - 50;
       this.spinButton.width = 200;
       this.spinButton.height = 100;
 
