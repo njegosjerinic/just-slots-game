@@ -57,3 +57,51 @@ Your submission will be evaluated on the following criteria:
 - Do not hesitate to ask questions if any part of the test is unclear.
 
 Good luck, and happy coding!
+
+## Setup
+
+Install the project dependencies:
+
+```bash
+npm install
+```
+
+Start the development server:
+
+```bash
+npm start
+```
+
+## Build
+
+Create a production build:
+
+```bash
+npm run build
+```
+
+## Lint
+
+Run the TypeScript lint checks:
+
+```bash
+npm run lint
+```
+
+## Tests
+
+Run the RGS unit tests:
+
+```bash
+npm test
+```
+
+## Implementation
+
+The game uses a small local RGS module. The `init` call returns the reel
+strips and their initial stop positions when the game is loaded. Each `spin`
+call returns the reel strips and newly generated stop positions.
+
+The client uses the data returned by the RGS to animate each horizontal reel.
+The reels slow down and stop at the requested positions. Winning results are
+evaluated from the visible symbols after all reels have stopped.
